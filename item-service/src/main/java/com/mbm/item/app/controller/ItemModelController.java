@@ -1,12 +1,15 @@
-/**
- * 
- */
 package com.mbm.item.app.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,10 +26,15 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 @RestController
 public class ItemModelController {
+	
+	private static Logger log = org.slf4j.LoggerFactory.getLogger(ItemModelController.class);
 
 	@Autowired
 	@Qualifier("feignService")
 	private ItemModelService itemService;
+	
+	@Value("${configuracion.texto}")
+	private String texto;
 	
 	@GetMapping("/")
 	public List<ItemModel> findAll() {
@@ -49,4 +57,14 @@ public class ItemModelController {
 		item.setProductModel(product);
 		return item;
 	}
+	
+	@GetMapping("/get-config")
+	public ResponseEntity<?> getConfig(@Value("${server.port}") String puerto) {
+		Map<String, String> json = new HashMap<String, String>();
+		json.put("text", texto);
+		json.put("port", puerto);
+		log.info("Puerto: " + puerto);
+		return new ResponseEntity<Map<String, String>>(json, HttpStatus.OK);
+	}
+	
 }
